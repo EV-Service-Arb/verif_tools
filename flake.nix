@@ -191,6 +191,32 @@
           echo "$output"
         '';
 
+        # verif_vid's renderer: a place dir (place.typ, and the mark it names as /place/mark.svg) in, each
+        # `<slot>=<print>:<aspect>` as <out>/<slot>.png off scripts/slot.typ, and the door's to_print.pdf as <out>/pack.pdf
+        render = pkgs.writeShellApplication {
+          name = "render";
+          runtimeInputs = [ pkgs.typst one-sided pkgs.coreutils ];
+          text = ''
+            place=''${1:?render <place dir> <out dir> <slot>=<print>:<aspect>…}
+            out=''${2:?render <place dir> <out dir> <slot>=<print>:<aspect>…}
+            shift 2
+            root=$(mktemp -d)
+            trap 'rm -rf "$root"' EXIT
+            cp -r --no-preserve=mode ${./.}/. "$root"
+            cp -r --no-preserve=mode "$place" "$root/place"
+            mkdir -p "$out"
+            unset SOURCE_DATE_EPOCH
+            typst() { command typst compile --root "$root" --ignore-system-fonts --font-path ${pkgs.liberation_ttf}/share/fonts/truetype --input place=/place/place.typ "$@"; }
+            for spec in "$@"; do
+              slot=''${spec%%=*}
+              rest=''${spec#*=}
+              typst --input print="''${rest%%:*}" --input aspect="''${rest#*:}" --ppi 300 "$root/scripts/slot.typ" "$out/$slot.png"
+            done
+            typst "$root/typ/to_print.typ" "$out/pack.pdf"
+            one-sided "$out/pack.pdf"
+          '';
+        };
+
         live = pkgs.writeShellScriptBin "live" ''
           export PATH=${pkgs.typst}/bin:$PATH
           exec ${pkgs.python3.withPackages (p: [ p.websockets p.pypdf ])}/bin/python3 ${./scripts}/live.py "$@"
@@ -226,6 +252,8 @@
             nix build .#typ               The signs no door decides, and every brand, in every language
             nix build "path:.#<place>"    Every sheet for that door: result/typ/to_print.pdf
             nix run . -- <place.typ>      The same to_print.pdf, in your downloads or -o DIR
+            nix run .#render -- <place dir> <out dir> <slot>=<print>:<aspect>…
+                                          verif_vid's slot art and pack, off scripts/slot.typ
             nix run .#live -- submit -h   Fill a place's verification form in a logged-in Chrome
             nix run .#payments-site -- KIND NAME [--lang en|fr] [--months N] [--seed N]
                                           Mock Stripe dashboard on :59130 and https://dev.aquafix.top
@@ -233,6 +261,11 @@
             nix develop                   Enter the Typst development shell
             EOF
           ''}/bin/help";
+        };
+
+        apps.render = {
+          type = "app";
+          program = "${render}/bin/render";
         };
 
         apps.live = {

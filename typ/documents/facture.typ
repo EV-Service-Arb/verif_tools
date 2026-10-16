@@ -27,7 +27,10 @@
   if lang == "fr" { n + "," + f + "\u{00A0}€" } else { "€" + n + "." + f }
 }
 
-#let facture(lang: "fr", date: none) = unit(full_page: true, {
+#let _margin = (top: 17mm, bottom: 16mm, left: 20mm, right: 20mm)
+
+// The page's content, set on the page or in a box of its own.
+#let facture-body(lang: "fr", date: none) = {
   // A month of rent is billed for the month it falls in.
   let debut = datetime(year: date.year(), month: date.month(), day: 1)
   let suivant = if date.month() == 12 {
@@ -102,11 +105,6 @@
   let ht = lignes.sum()
   let tva = int(calc.round(ht * tva_taux / 100))
 
-  set page(
-    paper: "a4",
-    margin: (top: 17mm, bottom: 16mm, left: 20mm, right: 20mm),
-    numbering: none,
-  )
   set text(font: "New Computer Modern", size: 10pt, lang: lang)
   set par(justify: true, leading: 0.58em)
 
@@ -195,4 +193,12 @@
     align: (left, top),
     signature(s.signature), coordonnees(lang),
   )
+}
+
+#let facture(lang: "fr", date: none) = unit(full_page: true, {
+  set page(paper: "a4", margin: _margin, numbering: none)
+  facture-body(lang: lang, date: date)
 })
+
+// The page as one A4 box.
+#let facture-face(lang: "fr", date: none) = box(width: 210mm, height: 297mm, inset: _margin, fill: white, facture-body(lang: lang, date: date))

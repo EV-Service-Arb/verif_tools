@@ -62,7 +62,7 @@
   stack(dir: ltr, spacing: 0pt, ..brand.name_segments.map(segment => text(size: size, weight: "bold", tracking: size * 0.015, fill: segment.color, upper(segment.text))))
 }
 
-#let _lockup(brand, size, fill) = grid(
+#let lockup(brand, size, fill) = grid(
   columns: 2,
   column-gutter: size * 0.42,
   align: horizon,
@@ -77,18 +77,18 @@
   ((door.descriptor, brand.accent),)
 }
 
-#let _front(brand, lang, door) = box(width: _card-w, height: _card-h, fill: brand.primary, {
+#let card-front(brand, lang, door) = box(width: _card-w, height: _card-h, fill: brand.primary, {
   set text(font: "Liberation Sans")
   let lines = _taglines(brand, lang, door, white).map(((s, fill)) => align(center, fit(66mm, 7pt, sz => text(size: sz, weight: "medium", tracking: sz * 0.2, fill: fill, upper(s)))))
   place(center + horizon, stack(
     dir: ttb,
     spacing: 7mm,
-    align(center, fit(58mm, 22pt, sz => _lockup(brand, sz, white))),
+    align(center, fit(58mm, 22pt, sz => lockup(brand, sz, white))),
     stack(dir: ttb, spacing: 3mm, ..lines),
   ))
 })
 
-#let _back(brand, lang, door) = box(width: _card-w, height: _card-h, fill: white, stroke: 0.4pt + _hairline, {
+#let card-back(brand, lang, door) = box(width: _card-w, height: _card-h, fill: white, stroke: 0.4pt + _hairline, {
   set text(font: "Liberation Sans", fill: _ink)
   place(top + left, rect(width: _card-w, height: 2mm, fill: brand.accent))
   place(top + left, block(inset: (x: 7mm, top: 5mm), {
@@ -117,7 +117,7 @@
   }
 })
 
-#let cards(brand, n, lang, door: none) = range(n).map(_ => unit(box(_front(brand, lang, door) + _back(brand, lang, door))))
+#let cards(brand, n, lang, door: none) = range(n).map(_ => unit(box(card-front(brand, lang, door) + card-back(brand, lang, door))))
 
 #let _band-h = 46mm
 
@@ -175,24 +175,13 @@
   place(center + horizon, dy: 1.1mm, stack(dir: ltr, spacing: 14mm, ..parts.map(p => align(horizon, p)).intersperse(align(horizon, rule))))
 })
 
-// `sign`: what this sheet points the way to, from `examples/main.typ`.
-#let poster(brand, lang, dark, door: none, sign: none) = unit(full_page: true, {
-  assert(not (dark and sign != none), message: "a sign's band is the brand's primary, so it vanishes on a dark sheet")
+// What a sheet carries inside its margins, set on the page or in a box of its own.
+#let _poster-body(brand, lang, dark, door) = {
   let ink = if dark { white } else { _ink }
-  set page(
-    paper: "a4",
-    flipped: true,
-    margin: (x: 18mm, top: 18mm, bottom: 18mm + if sign == none { 0mm } else { _band-h }),
-    fill: if dark { brand.primary } else { white },
-    background: if sign != none {
-      set text(font: "Liberation Sans")
-      place(bottom, _band(brand, lang, sign))
-    },
-  )
   set text(font: "Liberation Sans", fill: ink)
   set par(leading: 0pt, spacing: 0pt)
   align(center + horizon, block(width: 100%, {
-    align(center, fit(200mm, 90pt, sz => _lockup(brand, sz, ink)))
+    align(center, fit(200mm, 90pt, sz => lockup(brand, sz, ink)))
     v(16mm)
     stack(
       dir: ttb,
@@ -207,4 +196,31 @@
       stack(dir: ttb, spacing: 9mm, ..reached)
     }
   }))
+}
+
+#let _poster-margin = 18mm
+
+// `sign`: what this sheet points the way to, from `examples/main.typ`.
+#let poster(brand, lang, dark, door: none, sign: none) = unit(full_page: true, {
+  assert(not (dark and sign != none), message: "a sign's band is the brand's primary, so it vanishes on a dark sheet")
+  set page(
+    paper: "a4",
+    flipped: true,
+    margin: (x: _poster-margin, top: _poster-margin, bottom: _poster-margin + if sign == none { 0mm } else { _band-h }),
+    fill: if dark { brand.primary } else { white },
+    background: if sign != none {
+      set text(font: "Liberation Sans")
+      place(bottom, _band(brand, lang, sign))
+    },
+  )
+  _poster-body(brand, lang, dark, door)
 })
+
+// The sheet with no sign, as one A4 landscape box.
+#let poster-face(brand, lang, dark, door: none) = box(
+  width: 297mm,
+  height: 210mm,
+  inset: _poster-margin,
+  fill: if dark { brand.primary } else { white },
+  _poster-body(brand, lang, dark, door),
+)
