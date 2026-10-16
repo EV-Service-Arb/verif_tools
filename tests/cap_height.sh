@@ -5,7 +5,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-place=/examples/aquafix_-_Clermont-Ferrand_-_Montjuzet.typ
+place=/examples/aquafix_-_Clermont-Ferrand_-_Saint-Alyre.typ
 cap_mm=63 # 0.211 of that place's 30cm plate
 margin_mm=10
 ppi=300

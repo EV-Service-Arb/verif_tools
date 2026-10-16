@@ -10,7 +10,7 @@ places=("$@")
 if [ ${#places[@]} -eq 0 ]; then
   places=(
     /examples/random_location_france.typ # AVENUE DES / LANDAIS
-    /examples/aquafix_-_Clermont-Ferrand_-_Montjuzet.typ # RUE DES / CHANELLES
+    /examples/aquafix_-_Clermont-Ferrand_-_Saint-Alyre.typ # RUE / SAINT-ALYRE
   )
 fi
 paper_mm=210
