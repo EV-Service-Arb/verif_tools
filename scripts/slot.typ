@@ -12,7 +12,7 @@
 #let aspect = float(sys.inputs.aspect)
 
 // the drawing at its own size, and what fills the page around it: its own ground
-#let (drawing, ground) = if print == "sheet" {
+#let (drawing, ground) = if print in ("sheet", "car_sign") {
   (poster-face(brand, lang, false, door: door), white)
 } else if print in ("sign", "screen") {
   (poster-face(brand, lang, true, door: door), brand.primary)
