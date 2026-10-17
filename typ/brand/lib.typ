@@ -62,12 +62,16 @@
   stack(dir: ltr, spacing: 0pt, ..brand.name_segments.map(segment => text(size: size, weight: "bold", tracking: size * 0.015, fill: segment.color, upper(segment.text))))
 }
 
-#let lockup(brand, size, fill) = grid(
-  columns: 2,
-  column-gutter: size * 0.42,
-  align: horizon,
-  _mark(brand, size * 1.25, brand.accent), _name(brand, size, fill),
-)
+#let lockup(brand, size, fill, stacked: false) = if stacked {
+  stack(dir: ttb, spacing: size * 0.6, align(center, _mark(brand, size * 4, brand.accent)), align(center, _name(brand, size, fill)))
+} else {
+  grid(
+    columns: 2,
+    column-gutter: size * 0.42,
+    align: horizon,
+    _mark(brand, size * 1.25, brand.accent), _name(brand, size, fill),
+  )
+}
 
 // Without a door, the brand's own lines stand where the descriptor would; the
 // second is set in `rest`.

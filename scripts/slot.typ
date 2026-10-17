@@ -24,9 +24,9 @@
   (
     {
       set text(font: "Liberation Sans")
-      lockup(brand, 90pt, brand.primary)
+      pad(40pt, lockup(brand, 90pt, brand.primary, stacked: aspect < 1.5))
     },
-    none,
+    white,
   )
 } else if print == "address" {
   (pad(x: 18pt, y: 6pt, text(font: "Liberation Sans", weight: "bold", size: 60pt, fill: luma(20), top-edge: "cap-height", bottom-edge: "descender", address.street)), white)
