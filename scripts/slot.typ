@@ -28,6 +28,8 @@
     },
     none,
   )
+} else if print == "address" {
+  (pad(x: 18pt, y: 6pt, text(font: "Liberation Sans", weight: "bold", size: 60pt, fill: luma(20), top-edge: "cap-height", bottom-edge: "descender", address.street)), white)
 } else if print == "invoice" {
   (facture-face(lang: lang, date: recent-date(seed: 1)), white)
 } else {
