@@ -192,7 +192,7 @@
         '';
 
         # verif_vid's renderer: a place dir (place.typ, and the mark it names as /place/mark.svg) in, each
-        # `<slot>=<print>:<aspect>` as <out>/<slot>.png off scripts/slot.typ, and the door's to_print.pdf as <out>/pack.pdf
+        # `<slot>=<print>:<aspect>[:<offset>]` as <out>/<slot>.png off scripts/slot.typ, and the door's to_print.pdf as <out>/pack.pdf
         render = pkgs.writeShellApplication {
           name = "render";
           runtimeInputs = [ pkgs.typst one-sided pkgs.coreutils ];
@@ -210,7 +210,11 @@
             for spec in "$@"; do
               slot=''${spec%%=*}
               rest=''${spec#*=}
-              typst --input print="''${rest%%:*}" --input aspect="''${rest#*:}" --ppi 300 "$root/scripts/slot.typ" "$out/$slot.png"
+              args=(--input print="''${rest%%:*}")
+              rest=''${rest#*:}
+              args+=(--input aspect="''${rest%%:*}")
+              [[ $rest == *:* ]] && args+=(--input offset="''${rest#*:}")
+              typst "''${args[@]}" --ppi 300 "$root/scripts/slot.typ" "$out/$slot.png"
             done
             typst "$root/typ/to_print.typ" "$out/pack.pdf"
             one-sided "$out/pack.pdf"

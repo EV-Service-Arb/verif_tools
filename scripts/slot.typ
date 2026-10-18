@@ -28,8 +28,14 @@
     },
     white,
   )
-} else if print == "address" {
-  (pad(x: 18pt, y: 6pt, text(font: "Liberation Sans", weight: "bold", size: 60pt, fill: luma(20), top-edge: "cap-height", bottom-edge: "descender", address.street)), white)
+} else if print in ("address", "house_number") {
+  // offset: house numbers along the listing's street from its own, for a neighbour's
+  let m = address.street.match(regex("^(\d+)(.*)$"))
+  assert(m != none, message: "the listing's street starts with no house number: " + address.street)
+  let number = int(m.captures.first()) + int(sys.inputs.offset)
+  assert(number > 0, message: "offset " + sys.inputs.offset + " walks off the start of the street")
+  let label = if print == "address" { str(number) + m.captures.last() } else if aspect < 1 { stack(dir: ttb, spacing: 4pt, ..str(number).clusters()) } else { str(number) }
+  (pad(x: 18pt, y: 6pt, text(font: "Liberation Sans", weight: "bold", size: 60pt, fill: luma(20), top-edge: "cap-height", bottom-edge: "descender", label)), white)
 } else if print == "invoice" {
   (facture-face(lang: lang, date: recent-date(seed: 1)), white)
 } else {
